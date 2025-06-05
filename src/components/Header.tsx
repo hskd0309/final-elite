@@ -1,28 +1,19 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Heart, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from './AuthModal';
+import SearchBar from './SearchBar';
 
 const Header = () => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { getTotalItems } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
-    }
-  };
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -39,57 +30,78 @@ const Header = () => {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">E</span>
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">E</span>
               </div>
-              <span className="text-xl font-bold text-gray-900 hidden sm:block">EliteKart</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hidden sm:block">
+                EliteKart
+              </span>
             </Link>
 
             {/* Search Bar */}
-            <div className="flex-1 max-w-xl mx-4 hidden md:block">
-              <form onSubmit={handleSearch} className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 transition-colors"
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="absolute right-1 top-1 bottom-1 px-3"
-                >
-                  <Search className="w-4 h-4" />
-                </Button>
-              </form>
+            <div className="flex-1 max-w-2xl mx-4 hidden md:block">
+              <SearchBar />
             </div>
 
             {/* Right side buttons */}
-            <div className="flex items-center space-x-4">
-              {/* User button */}
+            <div className="flex items-center space-x-2 md:space-x-4">
+              {/* Wishlist (placeholder) */}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleAuthClick}
-                className="flex items-center space-x-2 hover:bg-gray-100"
+                className="hidden sm:flex items-center space-x-2 hover:bg-gray-100"
               >
-                {isAuthenticated && user?.avatar ? (
-                  <img src={user.avatar} alt="Profile" className="w-6 h-6 rounded-full" />
-                ) : (
-                  <User className="w-5 h-5" />
-                )}
-                <span className="hidden sm:inline">
-                  {isAuthenticated ? user?.name : 'Sign In'}
-                </span>
+                <Heart className="w-5 h-5" />
+                <span className="hidden lg:inline">Wishlist</span>
               </Button>
+
+              {/* User button */}
+              <div className="relative group">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAuthClick}
+                  className="flex items-center space-x-2 hover:bg-gray-100"
+                >
+                  {isAuthenticated && user?.avatar ? (
+                    <img src={user.avatar} alt="Profile" className="w-6 h-6 rounded-full" />
+                  ) : (
+                    <User className="w-5 h-5" />
+                  )}
+                  <span className="hidden sm:inline">
+                    {isAuthenticated ? user?.name?.split(' ')[0] : 'Sign In'}
+                  </span>
+                </Button>
+
+                {/* User Dropdown */}
+                {isAuthenticated && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className="p-2">
+                      <Link to="/profile" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                        My Profile
+                      </Link>
+                      <Link to="/orders" className="block px-3 py-2 text-sm hover:bg-gray-100 rounded">
+                        <Package className="w-4 h-4 inline mr-2" />
+                        My Orders
+                      </Link>
+                      <hr className="my-2" />
+                      <button
+                        onClick={logout}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded text-red-600"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Cart button */}
               <Link to="/cart">
-                <Button variant="ghost" size="sm" className="relative">
+                <Button variant="ghost" size="sm" className="relative hover:bg-gray-100">
                   <ShoppingCart className="w-5 h-5" />
                   {getTotalItems() > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
                       {getTotalItems()}
                     </span>
                   )}
@@ -111,47 +123,42 @@ const Header = () => {
 
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t bg-white py-4">
-              <form onSubmit={handleSearch} className="relative mb-4">
-                <Input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-12 py-2 border-2 border-gray-200 rounded-lg"
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="absolute right-1 top-1 bottom-1 px-3"
-                >
-                  <Search className="w-4 h-4" />
-                </Button>
-              </form>
+            <div className="md:hidden border-t bg-white py-4 animate-fade-in">
+              <div className="mb-4">
+                <SearchBar />
+              </div>
               <div className="space-y-2">
                 <Link
                   to="/profile"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
+                  <User className="w-4 h-4 inline mr-3" />
                   Profile
                 </Link>
                 <Link
                   to="/orders"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Orders
+                  <Package className="w-4 h-4 inline mr-3" />
+                  My Orders
                 </Link>
+                <button
+                  className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <Heart className="w-4 h-4 inline mr-3" />
+                  Wishlist
+                </button>
                 {isAuthenticated && (
                   <button
                     onClick={() => {
                       logout();
                       setMobileMenuOpen(false);
                     }}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+                    className="block w-full text-left px-4 py-3 text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    Logout
+                    Sign Out
                   </button>
                 )}
               </div>
