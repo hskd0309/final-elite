@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, Star, TrendingUp, Award } from 'lucide-react';
 import Header from '@/components/Header';
@@ -11,13 +11,19 @@ import { Badge } from '@/components/ui/badge';
 import { products, categories, brands } from '@/data/products';
 
 const Index = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange, setPriceRange] = useState([0, 200000]);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Clear search params when category is selected
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setSearchParams({});
+  };
 
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(product => {
@@ -107,7 +113,7 @@ const Index = () => {
               <Card 
                 key={category} 
                 className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => handleCategorySelect(category)}
               >
                 <CardContent className="p-4 text-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mx-auto mb-3 flex items-center justify-center">
@@ -123,7 +129,7 @@ const Index = () => {
         </section>
 
         {/* Trending Products */}
-        {trendingProducts.length > 0 && (
+        {trendingProducts.length > 0 && !searchQuery && selectedCategory === 'All' && (
           <section className="mb-12">
             <div className="flex items-center mb-6">
               <TrendingUp className="w-6 h-6 mr-2 text-orange-500" />
@@ -138,7 +144,7 @@ const Index = () => {
         )}
 
         {/* Best Sellers */}
-        {bestSellers.length > 0 && (
+        {bestSellers.length > 0 && !searchQuery && selectedCategory === 'All' && (
           <section className="mb-12">
             <div className="flex items-center mb-6">
               <Award className="w-6 h-6 mr-2 text-green-500" />
@@ -153,7 +159,7 @@ const Index = () => {
         )}
 
         {/* Top Deals */}
-        {topDeals.length > 0 && (
+        {topDeals.length > 0 && !searchQuery && selectedCategory === 'All' && (
           <section className="mb-12">
             <div className="flex items-center mb-6">
               <Star className="w-6 h-6 mr-2 text-red-500" />
@@ -197,7 +203,7 @@ const Index = () => {
                             name="category"
                             value={category}
                             checked={selectedCategory === category}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            onChange={(e) => handleCategorySelect(e.target.value)}
                             className="mr-2"
                           />
                           <span className="text-sm">{category}</span>
@@ -265,7 +271,8 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    {searchQuery ? `Search results for "${searchQuery}"` : 'All Products'}
+                    {searchQuery ? `Search results for "${searchQuery}"` : 
+                     selectedCategory !== 'All' ? `${selectedCategory} Products` : 'All Products'}
                   </h2>
                   <p className="text-gray-600">
                     Showing {filteredProducts.length} products
@@ -313,6 +320,7 @@ const Index = () => {
                     setSelectedCategory('All');
                     setSelectedBrand('All');
                     setPriceRange([0, 200000]);
+                    setSearchParams({});
                   }}>
                     Clear Filters
                   </Button>

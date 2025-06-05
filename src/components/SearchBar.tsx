@@ -40,9 +40,12 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
   const handleSearch = (searchQuery?: string) => {
     const searchTerm = searchQuery || query;
     if (searchTerm.trim()) {
-      navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`);
+      // Force navigation and page refresh to ensure proper search handling
+      navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`, { replace: true });
       setQuery('');
       setShowSuggestions(false);
+      // Scroll to top after search
+      window.scrollTo(0, 0);
     }
   };
 
@@ -50,6 +53,10 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    handleSearch(suggestion);
   };
 
   return (
@@ -96,7 +103,7 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
-                onClick={() => handleSearch(suggestion)}
+                onClick={() => handleSuggestionClick(suggestion)}
                 className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm"
               >
                 <Search className="w-3 h-3 inline mr-2 text-gray-400" />

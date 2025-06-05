@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, MapPin } from 'lucide-react';
 import Header from '@/components/Header';
@@ -27,15 +27,17 @@ const Checkout = () => {
     paymentMethod: 'card'
   });
 
-  if (!isAuthenticated) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/');
+      return;
+    }
 
-  if (items.length === 0) {
-    navigate('/cart');
-    return null;
-  }
+    if (items.length === 0) {
+      navigate('/cart');
+      return;
+    }
+  }, [isAuthenticated, items.length, navigate]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -49,18 +51,28 @@ const Checkout = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate order processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // Simulate order processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Create order
-    const orderId = 'ORD' + Date.now();
-    
-    // Clear cart and navigate to success
-    clearCart();
-    setLoading(false);
-    toast.success('Order placed successfully!');
-    navigate('/orders', { state: { newOrderId: orderId } });
+      // Create order
+      const orderId = 'ORD' + Date.now();
+      
+      // Clear cart and navigate to success
+      clearCart();
+      toast.success('Order placed successfully!');
+      navigate('/orders', { state: { newOrderId: orderId } });
+    } catch (error) {
+      toast.error('Failed to place order. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Don't render anything while checking authentication/cart
+  if (!isAuthenticated || items.length === 0) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
