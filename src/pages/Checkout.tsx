@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, MapPin } from 'lucide-react';
@@ -11,6 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import AuthModal from '@/components/AuthModal';
+import PaymentPage from '@/components/PaymentPage';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ const Checkout = () => {
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState('auth'); // auth, address, payment
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -25,8 +26,7 @@ const Checkout = () => {
     address: user?.address || '',
     city: '',
     state: '',
-    pincode: '',
-    paymentMethod: 'card'
+    pincode: ''
   });
 
   useEffect(() => {
@@ -35,10 +35,12 @@ const Checkout = () => {
       return;
     }
 
-    // Check if user is authenticated, if not show auth modal
+    // Determine the initial step based on authentication
     if (!isAuthenticated) {
+      setCurrentStep('auth');
       setShowAuthModal(true);
-      return;
+    } else {
+      setCurrentStep('address');
     }
   }, [items.length, navigate, isAuthenticated]);
 
@@ -65,30 +67,27 @@ const Checkout = () => {
 
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
+    setCurrentStep('address');
     toast.success('Please fill in your shipping details below');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      toast.error('Please sign in to complete your order');
-      return;
-    }
-
     // Validate required fields
     if (!formData.name || !formData.phone || !formData.address || !formData.city || !formData.state || !formData.pincode) {
       toast.error('Please fill in all required address fields');
       return;
     }
 
+    setCurrentStep('payment');
+    toast.success('Address saved! Please complete your payment.');
+  };
+
+  const handlePaymentSuccess = async () => {
     setLoading(true);
 
     try {
-      // Simulate order processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
       // Create order
       const orderId = 'ORD' + Date.now();
       
@@ -106,6 +105,17 @@ const Checkout = () => {
   // Show loading while checking items
   if (items.length === 0) {
     return null;
+  }
+
+  // Show payment page
+  if (currentStep === 'payment') {
+    return (
+      <PaymentPage 
+        totalAmount={getTotalPrice()}
+        onBack={() => setCurrentStep('address')}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+    );
   }
 
   return (
@@ -126,6 +136,38 @@ const Checkout = () => {
           <h1 className="text-2xl font-bold">Checkout</h1>
         </div>
 
+        {/* Step Indicator */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-4">
+            <div className={`flex items-center ${currentStep === 'auth' ? 'text-blue-600' : 'text-green-600'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep === 'auth' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}`}>
+                1
+              </div>
+              <span className="ml-2">Sign In</span>
+            </div>
+            <div className="w-8 h-px bg-gray-300"></div>
+            <div className={`flex items-center ${currentStep === 'address' ? 'text-blue-600' : currentStep === 'payment' ? 'text-green-600' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                currentStep === 'address' ? 'bg-blue-600 text-white' : 
+                currentStep === 'payment' ? 'bg-green-600 text-white' : 
+                'bg-gray-300 text-gray-600'
+              }`}>
+                2
+              </div>
+              <span className="ml-2">Address</span>
+            </div>
+            <div className="w-8 h-px bg-gray-300"></div>
+            <div className={`flex items-center ${currentStep === 'payment' ? 'text-blue-600' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                currentStep === 'payment' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
+              }`}>
+                3
+              </div>
+              <span className="ml-2">Payment</span>
+            </div>
+          </div>
+        </div>
+
         {!isAuthenticated ? (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-4">Please sign in to continue</h2>
@@ -134,10 +176,23 @@ const Checkout = () => {
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleAddressSubmit}>
             <div className="grid lg:grid-cols-3 gap-8">
-              {/* Checkout Form */}
+              {/* Address Form */}
               <div className="lg:col-span-2 space-y-6">
+                {/* User Profile */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Account Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p className="text-green-800 font-medium">Signed in as: {user?.name}</p>
+                      <p className="text-green-600 text-sm">{user?.email}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Shipping Information */}
                 <Card>
                   <CardHeader>
@@ -210,53 +265,6 @@ const Checkout = () => {
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Payment Method */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <CreditCard className="w-5 h-5 mr-2" />
-                      Payment Method
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="card"
-                          name="payment"
-                          value="card"
-                          checked={formData.paymentMethod === 'card'}
-                          onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                        />
-                        <label htmlFor="card" className="cursor-pointer">Credit/Debit Card</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="upi"
-                          name="payment"
-                          value="upi"
-                          checked={formData.paymentMethod === 'upi'}
-                          onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                        />
-                        <label htmlFor="upi" className="cursor-pointer">UPI</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="cod"
-                          name="payment"
-                          value="cod"
-                          checked={formData.paymentMethod === 'cod'}
-                          onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                        />
-                        <label htmlFor="cod" className="cursor-pointer">Cash on Delivery</label>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
 
               {/* Order Summary */}
@@ -307,7 +315,7 @@ const Checkout = () => {
                       size="lg"
                       disabled={loading || !isAuthenticated}
                     >
-                      {loading ? 'Processing...' : `Pay ${formatPrice(getTotalPrice())}`}
+                      {loading ? 'Processing...' : 'Continue to Payment'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -324,7 +332,8 @@ const Checkout = () => {
           if (!isAuthenticated) {
             navigate('/cart');
           }
-        }} 
+        }}
+        onSuccess={handleAuthSuccess}
       />
     </div>
   );
