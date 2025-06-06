@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { ArrowLeft, CreditCard, Smartphone, Building2, Wallet } from 'lucide-react';
+import { ArrowLeft, CreditCard, Smartphone, Building2, Wallet, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,7 +53,11 @@ const PaymentPage = ({ totalAmount, onBack, onPaymentSuccess }: PaymentPageProps
         }
       }
 
-      toast.success('Payment successful!');
+      if (selectedPayment === 'cod') {
+        toast.success('Order confirmed! You can pay when your order is delivered.');
+      } else {
+        toast.success('Payment successful!');
+      }
       onPaymentSuccess();
     } catch (error) {
       toast.error('Payment failed. Please try again.');
@@ -175,6 +178,29 @@ const PaymentPage = ({ totalAmount, onBack, onPaymentSuccess }: PaymentPageProps
                     <div>
                       <p className="font-medium">Digital Wallets</p>
                       <p className="text-sm text-gray-500">Paytm, Mobikwik, Amazon Pay</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cash on Delivery */}
+                <div 
+                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    selectedPayment === 'cod' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                  }`}
+                  onClick={() => setSelectedPayment('cod')}
+                >
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="cod"
+                      checked={selectedPayment === 'cod'}
+                      onChange={() => setSelectedPayment('cod')}
+                    />
+                    <Truck className="w-5 h-5" />
+                    <div>
+                      <p className="font-medium">Cash on Delivery</p>
+                      <p className="text-sm text-gray-500">Pay when you receive your order</p>
                     </div>
                   </div>
                 </div>
@@ -322,10 +348,16 @@ const PaymentPage = ({ totalAmount, onBack, onPaymentSuccess }: PaymentPageProps
                     <span>Taxes</span>
                     <span>{formatPrice(totalAmount * 0.18)}</span>
                   </div>
+                  {selectedPayment === 'cod' && (
+                    <div className="flex justify-between">
+                      <span>COD Charges</span>
+                      <span>{formatPrice(40)}</span>
+                    </div>
+                  )}
                   <div className="border-t pt-2">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>{formatPrice(totalAmount + (totalAmount * 0.18))}</span>
+                      <span>{formatPrice(totalAmount + (totalAmount * 0.18) + (selectedPayment === 'cod' ? 40 : 0))}</span>
                     </div>
                   </div>
                 </div>
@@ -339,7 +371,11 @@ const PaymentPage = ({ totalAmount, onBack, onPaymentSuccess }: PaymentPageProps
               size="lg"
               disabled={loading}
             >
-              {loading ? 'Processing...' : `Pay ${formatPrice(totalAmount + (totalAmount * 0.18))}`}
+              {loading ? 'Processing...' : 
+                selectedPayment === 'cod' ? 
+                  `Confirm Order ${formatPrice(totalAmount + (totalAmount * 0.18) + 40)}` : 
+                  `Pay ${formatPrice(totalAmount + (totalAmount * 0.18))}`
+              }
             </Button>
           </div>
         </form>
