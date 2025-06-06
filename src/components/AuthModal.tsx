@@ -11,9 +11,10 @@ import { toast } from 'sonner';
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
+const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
@@ -53,8 +54,12 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
       if (success) {
         toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
-        onClose();
         setFormData({ name: '', email: '', password: '' });
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          onClose();
+        }
       } else {
         toast.error('Invalid credentials');
       }
