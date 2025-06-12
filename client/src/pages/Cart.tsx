@@ -155,7 +155,7 @@ const Cart = () => {
                 </div>
 
                 <Button
-                  onClick={() => navigate('/checkout')}
+                  onClick={() => setLocation('/checkout')}
                   className="w-full mb-3"
                   size="lg"
                 >

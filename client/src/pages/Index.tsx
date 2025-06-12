@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { Search, Filter, Star, TrendingUp, Award } from 'lucide-react';
 import Header from '@/components/Header';
 import ProductCard from '@/components/ProductCard';
@@ -11,8 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { products, categories, brands } from '@/data/products';
 
 const Index = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search') || '';
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const searchQuery = urlParams.get('search') || '';
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [sortBy, setSortBy] = useState('featured');
@@ -22,7 +23,7 @@ const Index = () => {
   // Clear search params when category is selected
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
-    setSearchParams({});
+    window.history.pushState({}, '', '/');
   };
 
   const filteredProducts = useMemo(() => {

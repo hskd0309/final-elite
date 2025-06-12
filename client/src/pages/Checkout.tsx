@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { ArrowLeft, CreditCard, MapPin } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import AuthModal from '@/components/AuthModal';
 import PaymentPage from '@/components/PaymentPage';
 
 const Checkout = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { items, getTotalPrice, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ const Checkout = () => {
 
   useEffect(() => {
     if (items.length === 0) {
-      navigate('/cart');
+      setLocation('/cart');
       return;
     }
 
@@ -42,7 +42,7 @@ const Checkout = () => {
     } else {
       setCurrentStep('address');
     }
-  }, [items.length, navigate, isAuthenticated]);
+  }, [items.length, setLocation, isAuthenticated]);
 
   useEffect(() => {
     // Update form data when user changes
@@ -94,7 +94,7 @@ const Checkout = () => {
       // Clear cart and navigate to success
       clearCart();
       toast.success('Order placed successfully!');
-      navigate('/orders', { state: { newOrderId: orderId } });
+      setLocation('/orders');
     } catch (error) {
       toast.error('Failed to place order. Please try again.');
     } finally {
@@ -127,7 +127,7 @@ const Checkout = () => {
         <div className="flex items-center mb-8">
           <Button
             variant="ghost"
-            onClick={() => navigate('/cart')}
+            onClick={() => setLocation('/cart')}
             className="mr-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -330,7 +330,7 @@ const Checkout = () => {
         onClose={() => {
           setShowAuthModal(false);
           if (!isAuthenticated) {
-            navigate('/cart');
+            setLocation('/cart');
           }
         }}
         onSuccess={handleAuthSuccess}
