@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 import { Minus, Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
 
 const Cart = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { items, updateQuantity, removeFromCart, getTotalPrice, getTotalItems } = useCart();
 
   const formatPrice = (price: number) => {
@@ -47,7 +47,7 @@ const Cart = () => {
           <div className="flex items-center">
             <Button
               variant="ghost"
-              onClick={() => navigate(-1)}
+              onClick={() => window.history.back()}
               className="mr-4"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
