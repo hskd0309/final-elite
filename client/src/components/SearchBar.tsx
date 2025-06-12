@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const handleInputChange = (value: string) => {
     setQuery(value);
@@ -40,12 +40,10 @@ const SearchBar = ({ className = '' }: SearchBarProps) => {
   const handleSearch = (searchQuery?: string) => {
     const searchTerm = searchQuery || query;
     if (searchTerm.trim()) {
-      // Force navigation and page refresh to ensure proper search handling
-      navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`, { replace: true });
+      // Navigate to search page
+      setLocation(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
       setQuery('');
       setShowSuggestions(false);
-      // Scroll to top after search
-      window.scrollTo(0, 0);
     }
   };
 

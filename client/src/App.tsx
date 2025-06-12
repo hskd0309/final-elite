@@ -7,6 +7,7 @@ import { Router, Route, Switch } from "wouter";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
+import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -26,6 +27,7 @@ const App = () => (
           <Router>
             <Switch>
               <Route path="/" component={Index} />
+              <Route path="/search" component={Search} />
               <Route path="/cart" component={Cart} />
               <Route path="/checkout" component={Checkout} />
               <Route path="/orders" component={Orders} />
