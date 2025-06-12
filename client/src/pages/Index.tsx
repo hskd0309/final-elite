@@ -321,7 +321,7 @@ const Index = () => {
                     setSelectedCategory('All');
                     setSelectedBrand('All');
                     setPriceRange([0, 200000]);
-                    setSearchParams({});
+                    window.history.pushState({}, '', '/');
                   }}>
                     Clear Filters
                   </Button>

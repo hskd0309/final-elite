@@ -115,7 +115,7 @@ const Profile = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => navigate('/orders')}
+                  onClick={() => setLocation('/orders')}
                 >
                   <User className="w-4 h-4 mr-3" />
                   View Orders

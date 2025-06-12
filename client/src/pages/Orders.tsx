@@ -113,7 +113,7 @@ const Orders = () => {
         <div className="flex items-center mb-8">
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.back()}
             className="mr-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -127,7 +127,7 @@ const Orders = () => {
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No orders yet</h3>
             <p className="text-gray-600 mb-8">Start shopping to see your orders here</p>
-            <Button onClick={() => navigate('/')}>
+            <Button onClick={() => setLocation('/')}>
               Start Shopping
             </Button>
           </div>
