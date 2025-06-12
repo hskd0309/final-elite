@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { ArrowLeft, Package, Clock, CheckCircle, Truck } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Orders = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
-  
-  const newOrderId = location.state?.newOrderId;
 
   if (!isAuthenticated) {
     return (
@@ -21,7 +18,7 @@ const Orders = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Please sign in to view your orders</h2>
-            <Button onClick={() => navigate('/')}>Go to Home</Button>
+            <Button onClick={() => setLocation('/')}>Go to Home</Button>
           </div>
         </div>
       </div>
@@ -30,20 +27,6 @@ const Orders = () => {
 
   // Mock orders data
   const orders = [
-    ...(newOrderId ? [{
-      id: newOrderId,
-      date: new Date().toLocaleDateString(),
-      status: 'confirmed',
-      total: 45999,
-      items: [
-        {
-          name: 'Samsung Galaxy S24 Ultra',
-          image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=500',
-          quantity: 1,
-          price: 124999
-        }
-      ]
-    }] : []),
     {
       id: 'ORD1703123456',
       date: '2024-01-15',

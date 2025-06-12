@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { ArrowLeft, User, Mail, Phone, MapPin, Camera, Edit2, Save, X } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const Profile = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { user, isAuthenticated, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,7 +23,7 @@ const Profile = () => {
   });
 
   if (!isAuthenticated) {
-    navigate('/');
+    setLocation('/');
     return null;
   }
 
@@ -52,7 +52,7 @@ const Profile = () => {
         <div className="flex items-center mb-8">
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.back()}
             className="mr-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />

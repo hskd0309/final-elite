@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useRoute, useLocation } from 'wouter';
 import { ArrowLeft, ShoppingCart, Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -10,10 +10,12 @@ import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 
 const ProductDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [match, params] = useRoute('/product/:id');
+  const [, setLocation] = useLocation();
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  
+  const id = params?.id;
   
   const product = products.find(p => p.id === id);
 
@@ -24,7 +26,7 @@ const ProductDetail = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Product not found</h1>
-            <Button onClick={() => navigate('/')}>
+            <Button onClick={() => setLocation('/')}>
               Back to Home
             </Button>
           </div>
@@ -50,7 +52,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     handleAddToCart();
-    navigate('/cart');
+    setLocation('/cart');
   };
 
   return (
@@ -61,7 +63,7 @@ const ProductDetail = () => {
         {/* Back button */}
         <Button
           variant="ghost"
-          onClick={() => navigate(-1)}
+          onClick={() => window.history.back()}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
